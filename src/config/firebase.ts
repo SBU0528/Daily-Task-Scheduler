@@ -1,7 +1,11 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getFunctions } from 'firebase/functions';
+let getFunctions: any;
+if (typeof window !== 'undefined') {
+  // Only import getFunctions in the browser
+  getFunctions = require('firebase/functions').getFunctions;
+}
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -12,7 +16,7 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
+export const functions = typeof window !== 'undefined' && getFunctions ? getFunctions(app) : undefined;
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
