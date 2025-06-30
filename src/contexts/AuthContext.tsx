@@ -1,15 +1,21 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
-  User as FirebaseUser,
-  onAuthStateChanged,
+import React, { createContext, useEffect, useState } from 'react';
+import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut,
   signInWithPopup,
-  updateProfile
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  User as FirebaseUser
 } from 'firebase/auth';
-import { auth, googleProvider } from '../config/firebase';
-import { User } from '../types';
+import { auth, googleProvider } from '../firebase'; // Adjust path if needed
+
+interface User {
+  uid: string;
+  email: string;
+  displayName?: string;
+  photoURL?: string;
+}
 
 interface AuthContextType {
   currentUser: User | null;
@@ -21,14 +27,8 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export default AuthContext;
+// Move useAuth to a separate file to avoid Fast Refresh issues
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (user) {
         setCurrentUser({
           uid: user.uid,
-          email: user.email!,
+          email: user.email || '', // Avoid non-null assertion
           displayName: user.displayName || undefined,
           photoURL: user.photoURL || undefined,
         });
